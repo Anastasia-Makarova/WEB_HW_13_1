@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.services.email import send_email
 from src.database.db import get_db
 from src.repository import users as repository_users
-from src.schemas.user  import UserSchema, UserResponse, TokenSchema
+from src.schemas.user  import UserSchema, UserResponse, TokenSchema, RequestEmail
 from src.services.auth import auth_service
-
+  
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 get_refresh_token = HTTPBearer()
@@ -42,7 +42,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
     await repository_users.update_token(user, refresh_token, db)
     return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
-
+ 
 @router.get('/refresh_token')
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(get_refresh_token), db: AsyncSession = Depends(get_db)):
     token = credentials.credentials
@@ -69,3 +69,15 @@ async def confirmed_email(token: str, db: AsyncSession = Depends(get_db)):
         return {"message": "Your email is already confirmed"}
     await repository_users.confirmed_email(email, db)
     return {"message": "Email confirmed"}
+
+
+@router.post('/request_email')
+async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, request: Request,
+                        db: AsyncSession = Depends(get_db)):
+    user = await repository_users.get_user_by_email(body.email, db)
+
+    if user.confirmed:
+        return {"message": "Your email is already confirmed"}
+    if user:
+        background_tasks.add_task(send_email, user.email, user.username, str(request.base_url))
+    return {"message": "Check your email for confirmation."}
