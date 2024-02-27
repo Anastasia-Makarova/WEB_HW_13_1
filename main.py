@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
-# from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,15 +11,17 @@ from src.routres import auth
 
 app = FastAPI()
 
-# origins = ["*"]
+origins = ["*"]
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers= ["*"]
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers= ["*"]
+)
+
+app.mount('/static', StaticFiles(directory='src/static'), name='static')
 
 app.include_router(auth.router, prefix='/api')
 app.include_router(contacts.router, prefix='/api')

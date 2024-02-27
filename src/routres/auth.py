@@ -1,7 +1,8 @@
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Depends, Security, status, Path, Query, BackgroundTasks, Request
+from fastapi import APIRouter, HTTPException, Depends, Security, status, Path, Query, BackgroundTasks, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm, HTTPBearer
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -81,3 +82,12 @@ async def request_email(body: RequestEmail, background_tasks: BackgroundTasks, r
     if user:
         background_tasks.add_task(send_email, user.email, user.username, str(request.base_url))
     return {"message": "Check your email for confirmation."}
+
+ 
+# @router.get('/{username}')
+# async def request_email(username:str, response:Response, db: AsyncSession = Depends(get_db)):
+#     print('_____________________________________')
+#     print (f'Save to DB that email was opened by user {username}')
+#     print('_____________________________________')
+#     return FileResponse('src/static/open_check.png', media_type="image/png", 
+#                         content_disposition_type='inline')
