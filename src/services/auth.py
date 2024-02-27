@@ -10,13 +10,14 @@ from jose import JWTError, jwt
 
 from src.database.db import get_db
 from src.repository import users as repository_users
+from src.config.config import config
 
 
 class Auth:
     
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    SECRET_KEY = "af25160bfe725f16e26c5b7db161ea1d22c91032c501d83cac2d7966b6e1d2e6"
-    ALGORITHM = "HS256"
+    SECRET_KEY = config.SECRET_KEY_JWT
+    ALGORITHM = config.ALGORITHM
 
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
