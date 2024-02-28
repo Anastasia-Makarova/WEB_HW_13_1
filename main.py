@@ -17,14 +17,14 @@ from src.config.config import config
 
 app = FastAPI()
 
-origins = ["*"]
+origins = ["*"]     #   public; or origins = ["http://localhost:3000"] for some web on localhost:port
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers= ["*"]
+    allow_credentials=True,  #     True for JWT tokens
+    allow_methods=["*"],  #     [*] for all or ["GET, POST, PUT, DELETE"]
+    allow_headers= ["*"]   #     [*] for all or ["Authorization"]
 )
 
 app.mount('/static', StaticFiles(directory='src/static'), name='static')
