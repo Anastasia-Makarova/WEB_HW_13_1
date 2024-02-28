@@ -2,12 +2,18 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
+import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.db import get_db
+import uvicorn
+from fastapi import Depends, FastAPI
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
 
-from src.routres import contacts
-from src.routres import auth
+from src.database.db import get_db
+from src.routres import contacts, auth, users
+from src.config.config import config
+
 
 app = FastAPI()
 
@@ -24,7 +30,14 @@ app.add_middleware(
 app.mount('/static', StaticFiles(directory='src/static'), name='static')
 
 app.include_router(auth.router, prefix='/api')
+app.include_router(users.router, prefix='/api')
 app.include_router(contacts.router, prefix='/api')
+
+
+@app.on_event("startup")
+async def startup():
+    r = await redis.Redis(host=config.REDIS_DOMAIN, port=config.REDIS_PORT, db=0, password=config.REDIS_PASSWORD)
+    await FastAPILimiter.init(r)
 
 
 @app.get('/')
@@ -45,3 +58,7 @@ async def healthchecker(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error connecting to the database")
+    
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", reload=True)
