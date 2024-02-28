@@ -1,12 +1,16 @@
+from ipaddress import ip_address
+import re
+from typing import Callable
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request, status
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 
@@ -16,6 +20,36 @@ from src.config.config import config
 
 
 app = FastAPI()
+
+'''IP blacklist'''
+
+# banned_ips = [ip_address("192.168.1.1"), ip_address("192.168.1.2")]     #    , ip_address("127.0.0.1")
+
+# @app.middleware("http")
+# async def ban_ips(request: Request, call_next: Callable):
+#     ip = ip_address(request.client.host)
+#     if ip in banned_ips:
+#         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": "You are banned"})
+#     response = await call_next(request)
+#     return response
+
+'''UserAgent blacklist'''
+
+# user_agent_ban_list = [r"bot-Yandex"]
+
+
+# @app.middleware("http")
+# async def user_agent_ban_middleware(request: Request, call_next: Callable):
+#     print(request.headers)
+#     user_agent = request.headers.get("user-agent")
+#     print(user_agent)
+#     for ban_pattern in user_agent_ban_list:
+#         if re.search(ban_pattern, user_agent):
+#             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": "You are banned"})
+#     response = await call_next(request)
+#     return response
+
+'''CORS'''
 
 origins = ["*"]     #   public; or origins = ["http://localhost:3000"] for some web on localhost:port
 
