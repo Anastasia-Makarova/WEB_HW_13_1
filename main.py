@@ -4,7 +4,8 @@ from typing import Callable
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -74,9 +75,12 @@ async def startup():
     await FastAPILimiter.init(r)
 
 
-@app.get('/')
-def index():
-    return {'message': "Contacts book"}
+templates = Jinja2Templates(directory='src/templates')
+
+
+@app.get('/', response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse('index.html', {'request': request, 'our': 'Contact book on REST API'})
 
 @app.get("/api/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_db)):

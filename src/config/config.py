@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     REDIS_DOMAIN: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str | None = None
+    CLD_NAME: str = "HW13"
+    CLD_API_KEY: int = 834932673911364
+    CLD_API_SECRET: str = "secret"
+
 
     @field_validator("ALGORITHM")
     @classmethod
