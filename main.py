@@ -71,7 +71,10 @@ app.include_router(contacts.router, prefix='/api')
 
 @app.on_event("startup")
 async def startup():
-    r = await redis.Redis(host=config.REDIS_DOMAIN, port=config.REDIS_PORT, db=0, password=config.REDIS_PASSWORD)
+    r = await redis.Redis(host=config.REDIS_DOMAIN, 
+                          port=config.REDIS_PORT, 
+                          db=0, 
+                          password=config.REDIS_PASSWORD)
     await FastAPILimiter.init(r)
 
 
