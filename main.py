@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
+from pathlib import Path
 
 import uvicorn
 from fastapi import Depends, FastAPI, Request, status
@@ -62,7 +63,9 @@ app.add_middleware(
     allow_headers= ["*"]   #     [*] for all or ["Authorization"]
 )
 
-app.mount('/static', StaticFiles(directory='src/static'), name='static')
+BASE_DIR = Path('.')
+
+app.mount('/static', StaticFiles(directory=BASE_DIR /'src' / 'static'), name='static')
 
 app.include_router(auth.router, prefix='/api')
 app.include_router(users.router, prefix='/api')
@@ -78,7 +81,7 @@ async def startup():
     await FastAPILimiter.init(r)
 
 
-templates = Jinja2Templates(directory='src/templates')
+templates = Jinja2Templates(directory=BASE_DIR /'src' /'templates')
 
 
 @app.get('/', response_class=HTMLResponse)
