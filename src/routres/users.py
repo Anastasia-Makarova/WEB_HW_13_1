@@ -41,6 +41,18 @@ async def update_avatar(file: UploadFile = File(),
         width=250, height=250, crop="fill", version=res.get("version")
     )
     user = await repository_users.update_avatar_url(user.email, res_url, db)
-    # auth_service.cache.set(user.email, pickle.dumps(user))
-    # auth_service.cache.expire(user.email, 300)
+    return user
+
+
+@router.patch('/password', response_model=UserResponse, 
+              description='No more than 1 requests per 20 sec',
+              dependencies=[Depends(RateLimiter(times=1, seconds=20))])
+async def update_password(old_password: str,  
+                          new_password: str,
+                          user: User = Depends(auth_service.get_current_user),
+                          db: AsyncSession = Depends(get_db)):
+    if not auth_service.verify_password(old_password, user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
+    new_password = auth_service.get_password_hash(new_password)
+    user = await repository_users.update_password(user.email, new_password, db)
     return user

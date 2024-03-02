@@ -48,3 +48,11 @@ async def update_avatar_url(email: str, url: str | None, db: AsyncSession) -> Us
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def update_password(email: str, new_password: str, db: AsyncSession) -> User:
+    user = await get_user_by_email(email, db)
+    user.password = new_password
+    await db.commit()
+    await db.refresh(user)
+    return user
